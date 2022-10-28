@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Shopping.Models;
 using Shopping.Data;
 using Shopping.Data.Entities;
-
+using Shopping.Models;
 
 namespace Shopping.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class CountriesController : Controller
     {
         private readonly DataContext _context;
@@ -24,9 +20,9 @@ namespace Shopping.Controllers
         // GET: Countries
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Countries
-                  .Include(c => c.States)
-                 . ToListAsync());
+            return View(await _context.Countries
+                .Include(c => c.States)
+               .ToListAsync());
         }
 
         // GET: Countries/Details/5
@@ -36,7 +32,7 @@ namespace Shopping.Controllers
             {
                 return NotFound();
             }
-           
+
 
             Country country = await _context.Countries
                 .Include(c => c.States)
@@ -61,7 +57,7 @@ namespace Shopping.Controllers
                 .Include(c => c.Country)
                 .Include(s => s.Cities)
                 .FirstOrDefaultAsync(m => m.Id == id);
-     
+
             if (state == null)
             {
                 return NotFound();
@@ -92,7 +88,7 @@ namespace Shopping.Controllers
         // GET: Countries/Create
         public IActionResult Create()
         {
-            Country country = new() { States = new List<State>()};
+            Country country = new() { States = new List<State>() };
             return View(country);
         }
 
@@ -128,7 +124,7 @@ namespace Shopping.Controllers
             return View(country);
         }
 
-        public async Task <IActionResult> AddState(int? id)
+        public async Task<IActionResult> AddState(int? id)
         {
             if (id == null)
             {
@@ -163,7 +159,7 @@ namespace Shopping.Controllers
                         Cities = new List<City>(),
                         Country = await _context.Countries.FindAsync(model.CountryId),
                         Name = model.Name,
-                        
+
                     };
 
                     _context.Add(state);
@@ -359,7 +355,7 @@ namespace Shopping.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, 
+                        ModelState.AddModelError(string.Empty,
                           dbUpdateException.InnerException.Message);
                     }
                 }
@@ -471,7 +467,7 @@ namespace Shopping.Controllers
             {
                 _context.Countries.Remove(country);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -503,9 +499,9 @@ namespace Shopping.Controllers
             State state = await _context.States
             .Include(s => s.Country)
            .FirstOrDefaultAsync(s => s.Id == id);
-           _context.States.Remove(state);
+            _context.States.Remove(state);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Details), new {Id = state.Country.Id});
+            return RedirectToAction(nameof(Details), new { Id = state.Country.Id });
         }
 
         public async Task<IActionResult> DeleteCity(int? id)
@@ -515,9 +511,9 @@ namespace Shopping.Controllers
                 return NotFound();
             }
 
-           City city = await _context.Cities
-                .Include(s => s.State)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            City city = await _context.Cities
+                 .Include(s => s.State)
+                 .FirstOrDefaultAsync(s => s.Id == id);
             if (city == null)
             {
                 return NotFound();
